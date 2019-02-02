@@ -1,9 +1,10 @@
 import numpy as np
 from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
 
 class Perceptron(object):
 
-    def __init__(self, shape, learning_rate=0.1, epochs=50):
+    def __init__(self, shape, learning_rate=0.1, epochs=100):
         self.weight = np.random.randn(1, shape + 1)
         self.epochs = epochs
         self.learning_rate = learning_rate
@@ -35,14 +36,26 @@ class Perceptron(object):
            self.errors.append(err)
            print("epoch=%d, error=%.2f" % (epoch, err))
 
+    def test_perceptron(self, X, y):
+        predicted = self.predict(X)
+        e = predicted - y
+        correct = 0
+        for error in e:
+            if error==0:
+                correct += 1
+        accuracy = (correct/y.shape[0])*100
+        return accuracy
+
 if __name__ == "__main__":
     iris = load_iris()
     X = iris.data
-    X_train = X[:90]
-    X_test = X[90:100]
+    mean = np.mean(X)
+    std = np.std(X)
+    X = (X - mean)/std
     y = iris.target
-    y_train = y[:90]
-    y_test = y[90:100]
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33)
 
     perceptron = Perceptron(shape=X.shape[1])
     perceptron.fit(X_train, y_train)
+
+    print("Accuracy = {0}%".format(perceptron.test_perceptron(X_test, y_test)))
